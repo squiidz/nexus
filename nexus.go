@@ -1,8 +1,6 @@
-package probe
+package nexus
 
 import (
-	//	"errors"
-	//	"fmt"
 	"sync"
 )
 
@@ -16,23 +14,38 @@ type Nexus struct {
 	WaitStack sync.WaitGroup
 }
 
-func NewNexus(inst int, job ...interface{}) *Nexus {
+func NewNexus(nbrProbes int, job ...interface{}) *Nexus {
 	n := &Nexus{Job: job}
-	n.NewProbes(inst)
+	n.NewProbes(nbrProbes)
 	return n
 }
 
-func (n *Nexus) Start() {
+func EmptyNexus() *Nexus {
+	return &Nexus{}
+}
+
+// Start the Probes with the Default or custom starter
+func (n *Nexus) Start(options ...func(*Nexus)) {
 	if n.Starter != nil {
 		n.Starter(n)
 	} else {
-
-		for _, p := range n.Probes {
-			go p.Work()
-		}
+		n.DefaultStarter()
+	}
+	for _, op := range options {
+		op(n)
 	}
 }
 
+// Default Nexus Jobs Starter
+func (n *Nexus) DefaultStarter() {
+	for _, p := range n.Probes {
+		n.WaitStack.Add(1)
+		go p.Work()
+	}
+	n.WaitStack.Wait()
+}
+
+// The User can provid he's own starter
 func (n *Nexus) SetStarter(s Starter) {
 	n.Starter = s
 }

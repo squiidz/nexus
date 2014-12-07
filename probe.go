@@ -1,6 +1,7 @@
-package probe
+package nexus
 
 import (
+	"fmt"
 	"io"
 	"reflect"
 	"sync"
@@ -13,12 +14,15 @@ type Probe struct {
 	Info interface{}
 	Data map[int]interface{}
 	Jobs []interface{}
-	Errs string
+	Err  error
 	Wait *sync.WaitGroup
 }
 
-func (n *Nexus) NewProbe() {
-	n.Probes = append(n.Probes, &Probe{Id: len(n.Probes) + 1, Jobs: n.Job, Wait: &n.WaitStack})
+func (n *Nexus) NewProbe() *Probe {
+	prob := &Probe{Id: len(n.Probes) + 1, Jobs: n.Job, Wait: &n.WaitStack}
+	n.Probes = append(n.Probes, prob)
+
+	return prob
 }
 
 func (n *Nexus) NewProbes(ps int) {
@@ -37,11 +41,15 @@ func (p *Probe) Work() {
 
 		var cont []interface{}
 
-		for _, arg := range result {
+		for j, arg := range result {
 			cont = append(cont, arg.Interface())
+			switch cont[j].(type) {
+			case error:
+				p.Err = cont[j].(error)
+			default:
+				p.Data[i] = cont[j]
+			}
 		}
-		p.Data[i] = cont
-
 	}
 	p.Wait.Done()
 }
@@ -50,11 +58,16 @@ func (p *Probe) Extract(wri io.Writer) {
 	for _, d := range p.Data {
 		switch d.(type) {
 		case string:
-			wri.Write([]byte(d.(string)))
+			n, _ := wri.Write([]byte(d.(string)))
+			fmt.Println(n)
 		case int:
-			wri.Write(d.([]byte))
+			n, _ := wri.Write(d.([]byte))
+			fmt.Println(n)
 		case []byte:
-			wri.Write(d.([]byte))
+			n, _ := wri.Write(d.([]byte))
+			fmt.Println(n)
+		default:
+			fmt.Println(reflect.TypeOf(d), "IS NOT A VALID TYPE")
 		}
 	}
 }
