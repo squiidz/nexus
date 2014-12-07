@@ -3,7 +3,7 @@ nexus
 
 Simple Worker Lib
 
-### Example
+### Example #1
 
 ``` go
 
@@ -21,6 +21,38 @@ func main() {
 
 func Job() string{
 	return "Job Done"
+}
+
+```
+
+### Example #2
+
+``` go
+
+package main 
+
+import(
+	"github.com/squiidz/nexus"
+)
+
+func main() {
+	// EmptyNexus(), set parameter by hand
+	man := nexus.EmptyNexus()
+	
+	// Set some probe to work
+	man.NewProbe().NewJob(Job)
+	man.NewProbe().NewJob(Job2)
+
+	// Start Working
+	man.Start()
+}
+
+func Job() string{
+	return "Job Done"
+}
+
+func Job2() []byte{
+	return []byte("Some Bytes")
 }
 
 ```
