@@ -1,7 +1,8 @@
-nexus
+Nexus
 =====
 
-Simple Worker Lib
+### Simple Golang Worker
+Multiplex your Jobs to multiple worker.
 
 ### Example #1
 
@@ -38,7 +39,7 @@ import(
 func main() {
 	// EmptyNexus(), set parameter by hand
 	man := nexus.EmptyNexus()
-	
+
 	// Set some probe to work
 	man.NewProbe().NewJob(Job)
 	man.NewProbe().NewJob(Job2)
