@@ -15,7 +15,7 @@ import(
 )
 
 func main() {
-	// NewNexus(Number of worker, Job to Do)
+	// NewNexus(Number of Probes, Jobs to Do)
 	man := nexus.NewNexus(3, Job)
 	man.Start()
 }
@@ -37,10 +37,10 @@ import(
 )
 
 func main() {
-	// EmptyNexus(), set parameter by hand
-	man := nexus.EmptyNexus()
+	// New(), Create a empty Nexus
+	man := nexus.New()
 
-	// Set some probe to work
+	// Add some probe to the Nexus, and set Jobs on them
 	man.NewProbe().NewJob(Job)
 	man.NewProbe().NewJob(Job2)
 
