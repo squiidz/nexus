@@ -2,6 +2,7 @@ package nexus
 
 import (
 	"sync"
+	"time"
 )
 
 type Starter func(n *Nexus)
@@ -20,7 +21,7 @@ func NewNexus(nbrProbes int, job ...interface{}) *Nexus {
 	return n
 }
 
-func EmptyNexus() *Nexus {
+func New() *Nexus {
 	return &Nexus{}
 }
 
@@ -41,6 +42,7 @@ func (n *Nexus) DefaultStarter() {
 	for _, p := range n.Probes {
 		n.WaitStack.Add(1)
 		go p.Work()
+		time.Sleep(time.Second * 1)
 	}
 	n.WaitStack.Wait()
 }

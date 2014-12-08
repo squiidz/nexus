@@ -1,38 +1,20 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"io/ioutil"
 	//"net/http"
 
 	nex "github.com/squiidz/nexus"
+	plug "github.com/squiidz/nexus/plugin"
 )
 
 func main() {
-	nexus := nex.EmptyNexus()
+	nexus := nex.New()
 	nexus.NewProbe().NewJob(Bla)
-	nexus.NewProbe().NewJob(Blob)
-	nexus.NewProbe().NewJob(Blip)
+	pr := nexus.NewProbe()
+	pr.NewJob(Blob)
 
-	nexus.Start(LogAct, CheckErr)
-}
-
-func LogAct(n *nex.Nexus) {
-	var size int
-	for _, p := range n.Probes {
-		b := bytes.NewBuffer([]byte(""))
-		p.Extract(b)
-		fmt.Println(b.String())
-		size += b.Len()
-	}
-	fmt.Println("TOTAL SIZE :", size)
-}
-
-func CheckErr(n *nex.Nexus) {
-	for _, p := range n.Probes {
-		fmt.Printf("Probe #%d: %s\n", p.Id, p.Err.Error())
-	}
+	nexus.Start(plug.DataSize, plug.CheckErr)
 }
 
 func Bla() error {
@@ -49,11 +31,6 @@ func Blob() error {
 		return err
 	}
 	return nil
-}
-
-func Blip() int {
-	i := 9
-	return i * i
 }
 
 /*

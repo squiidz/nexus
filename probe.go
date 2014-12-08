@@ -31,47 +31,53 @@ func (n *Nexus) NewProbes(ps int) {
 	}
 }
 
+func (p *Probe) NewJob(j Job) {
+	p.Jobs = append(p.Jobs, j)
+}
+
 func (p *Probe) Work() {
 	p.Data = make(map[int]interface{}, len(p.Jobs))
+	fmt.Printf("Probe #%d Start Working \n", p.Id)
 	for i, j := range p.Jobs {
+
 		task := reflect.ValueOf(j)
-		in := make([]reflect.Value, 0)
+		//DEBUG: fmt.Println(reflect.TypeOf(j))
+		in := []reflect.Value{}
 
 		result := task.Call(in)
 
-		var cont []interface{}
+		for _, arg := range result {
+			tmp := arg.Interface()
 
-		for j, arg := range result {
-			cont = append(cont, arg.Interface())
-			switch cont[j].(type) {
+			switch tmp.(type) {
 			case error:
-				p.Err = cont[j].(error)
+				p.Err = tmp.(error)
 			default:
-				p.Data[i] = cont[j]
+				p.Data[i] = tmp
 			}
 		}
 	}
 	p.Wait.Done()
 }
 
-func (p *Probe) Extract(wri io.Writer) {
+func (p *Probe) Extract(wri io.Writer) string {
+	var n int
 	for _, d := range p.Data {
 		switch d.(type) {
 		case string:
-			n, _ := wri.Write([]byte(d.(string)))
-			fmt.Println(n)
+			n, _ = wri.Write([]byte(d.(string)))
 		case int:
-			n, _ := wri.Write(d.([]byte))
-			fmt.Println(n)
+			n, _ = wri.Write(d.([]byte))
 		case []byte:
-			n, _ := wri.Write(d.([]byte))
-			fmt.Println(n)
+			n, _ = wri.Write(d.([]byte))
 		default:
 			fmt.Println(reflect.TypeOf(d), "IS NOT A VALID TYPE")
 		}
+		//DEBUG: fmt.Println("TYPE IS :", reflect.TypeOf(d))
 	}
+
+	return fmt.Sprintf("Probe #%d: %d data writed", p.Id, n)
 }
 
-func (p *Probe) NewJob(j Job) {
-	p.Jobs = append(p.Jobs, j)
+func (p *Probe) Stats() {
 }
