@@ -11,7 +11,6 @@ type Job interface{}
 
 type Probe struct {
 	Id   int
-	Info interface{}
 	Data map[int]interface{}
 	Jobs []interface{}
 	Err  error
